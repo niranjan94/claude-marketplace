@@ -6,7 +6,10 @@
     "plugins": [
         {
             "name": "agent-skills",
-            "source": "niranjan94/agent-skills",
+            "source": {
+                "source": "github",
+                "repo": "niranjan94/agent-skills"
+            },
             "description": "My personal collection of skills I use with AI Agents"
         }
     ]
