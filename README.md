@@ -11,7 +11,7 @@ A personal plugin marketplace for Claude. Serves as a registry of plugins and sk
 (or)
 
 ```
-claude plugin marketplace add niranjan94/claude-marketplace
+claude plugin marketplace add niranjan94/claude-marketplace --scope user
 ```
 
 And to install any plugin from the marketplace
