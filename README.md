@@ -1,4 +1,4 @@
-# personal-claude-marketplace
+# niranjan94-claude-marketplace
 
 A personal plugin marketplace for Claude. Serves as a registry of plugins and skills for use with AI agents.
 
@@ -6,6 +6,18 @@ A personal plugin marketplace for Claude. Serves as a registry of plugins and sk
 
 ```
 /plugin marketplace add niranjan94/claude-marketplace
+```
+
+(or)
+
+```
+claude plugin marketplace add niranjan94/claude-marketplace
+```
+
+And to install any plugin from the marketplace
+
+```
+claude plugin install <plugin-name>@niranjan94-claude-marketplace --scope user
 ```
 
 ## Structure
