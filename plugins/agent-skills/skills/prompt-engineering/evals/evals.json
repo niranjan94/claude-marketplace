@@ -1,0 +1,47 @@
+{
+  "skill_name": "prompt-engineering",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm building a Slack bot that reviews pull requests using the Claude API. It should read the diff, check for common issues (security, performance, style), and post a summary comment. I need a good system prompt for it. The bot uses claude-sonnet-4-6 with tool use for reading files and posting comments. Right now the responses are kind of generic and miss subtle bugs.",
+      "expected_output": "A well-structured system prompt that uses role-setting, XML tags for organizing the diff context, explicit instructions for what to check, and guidance on output format. Should reference appropriate model configuration (effort, thinking) for a code review task.",
+      "files": [],
+      "expectations": [
+        "The response includes a concrete, ready-to-use system prompt (not just advice)",
+        "The system prompt uses role-setting to establish Claude as a code reviewer",
+        "The system prompt uses XML tags to structure the diff context or review categories",
+        "The response addresses the 'generic and misses subtle bugs' problem with specific instructions",
+        "The response includes guidance on model configuration (effort level, thinking, or tool use settings)",
+        "The system prompt covers the three requested review areas: security, performance, and style"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "My Claude-powered customer support agent is way too verbose. It writes like 3 paragraphs when a sentence would do, uses bullet points everywhere, and keeps saying things like 'Great question!' and 'I'd be happy to help!'. Here's my current system prompt:\n\nYou are a helpful customer support agent for Acme Corp. Answer customer questions about our products. Be thorough and detailed in your responses. Use formatting to make responses easy to read. Always be polite and professional.\n\nHow do I fix this?",
+      "expected_output": "Diagnosis of why the prompt produces verbose output. A rewritten prompt that steers toward concise, direct responses, removes filler phrases, and uses output formatting techniques.",
+      "files": [],
+      "expectations": [
+        "The response diagnoses specific problems in the original prompt (identifies 'thorough and detailed' or 'use formatting' as causes)",
+        "The response provides a rewritten system prompt (not just general advice)",
+        "The rewritten prompt steers toward concise responses (uses words like concise, brief, direct, or short)",
+        "The rewritten prompt addresses the filler phrase problem (preambles, 'Great question', etc.)",
+        "The response explains WHY the changes work, connecting to prompting principles",
+        "The rewritten prompt uses positive framing (tells what to do, not just what to avoid)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I have a working agentic coding assistant built on claude-sonnet-4-5-20250929 with extended thinking (budget_tokens: 32000). It uses tool_use for file operations and runs autonomously for up to 30 minutes on complex refactoring tasks. I want to migrate to claude-sonnet-4-6. What do I need to change? Here's my current setup:\n\n```python\nresponse = client.messages.create(\n    model='claude-sonnet-4-5-20250929',\n    max_tokens=64000,\n    thinking={'type': 'enabled', 'budget_tokens': 32000},\n    system='You are an expert software engineer. ALWAYS use the read_file tool before making changes. You MUST be thorough in your analysis.',\n    messages=messages,\n    tools=tools,\n)\n```",
+      "expected_output": "Step-by-step migration guidance with concrete code snippet showing updated configuration.",
+      "files": [],
+      "expectations": [
+        "The response includes updating the model string to claude-sonnet-4-6",
+        "The response addresses thinking configuration (recommends adaptive thinking or adjusted extended thinking)",
+        "The response recommends setting an effort level appropriate for coding (medium or high)",
+        "The response identifies the ALWAYS/MUST language as problematic for Claude 4.6 and suggests toning it down",
+        "The response includes a concrete rewritten code snippet showing the migrated configuration",
+        "The response mentions subagent behavior considerations for long-running autonomous tasks"
+      ]
+    }
+  ]
+}

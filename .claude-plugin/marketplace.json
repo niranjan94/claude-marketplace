@@ -1,16 +1,13 @@
 {
-    "name": "niranjan94-claude-marketplace",
-    "owner": {
-        "name": "Niranjan Rajendran"
-    },
-    "plugins": [
-        {
-            "name": "agent-skills",
-            "source": {
-                "source": "github",
-                "repo": "niranjan94/agent-skills"
-            },
-            "description": "My personal collection of skills I use with AI Agents"
-        }
-    ]
+  "name": "personal-claude-marketplace",
+  "owner": {
+    "name": "Niranjan Rajendran"
+  },
+  "plugins": [
+    {
+      "name": "agent-skills",
+      "source": "./plugins/agent-skills",
+      "description": "My personal collection of skills I use with AI Agents"
+    }
+  ]
 }
