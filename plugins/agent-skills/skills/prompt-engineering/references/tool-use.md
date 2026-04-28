@@ -7,6 +7,7 @@ Guidance on prompting Claude to use tools effectively, including action bias, pa
 - [Explicit action instructions](#explicit-action-instructions)
 - [Proactive vs conservative action](#proactive-vs-conservative-action)
 - [Parallel tool calling](#parallel-tool-calling)
+- [Tool-call frequency on Opus 4.7](#tool-call-frequency-on-opus-47)
 - [Overtriggering in Claude 4.6](#overtriggering-in-claude-46)
 
 ---
@@ -80,6 +81,22 @@ use placeholders or guess missing parameters in tool calls.
 ```
 Execute operations sequentially with brief pauses between each step to ensure stability.
 ```
+
+## Tool-call frequency on Opus 4.7
+
+Opus 4.7 reverses the 4.6 trend on tool usage: it uses tools **less** often than 4.6 and relies on reasoning more. In most workloads this produces better results, but if your application benefits from heavy tool usage (agentic search, broad code exploration), you may need to nudge it back up.
+
+Two ways to increase tool usage on 4.7:
+
+1. **Raise effort.** `high` or `xhigh` show substantially more tool usage in agentic search and coding tasks.
+2. **Be explicit about when to call tools.** With 4.7's more literal instruction following, vague guidance is interpreted narrowly. Specify which tools to use for which situations:
+
+```
+For any code search task, call the grep_codebase tool before answering -- do not rely on
+prior knowledge of the codebase. For file content, call read_file rather than guessing.
+```
+
+Watch for the inverse problem too: aggressive prompts written for 4.5/4.6 ("CRITICAL: You MUST use this tool when...") may now cause overtriggering. See the next section.
 
 ## Overtriggering in Claude 4.6
 

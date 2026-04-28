@@ -5,6 +5,9 @@ Guidance on building agentic systems with Claude, covering long-horizon reasonin
 ## Table of contents
 
 - [Long-horizon reasoning and state tracking](#long-horizon-reasoning-and-state-tracking)
+- [Literal instruction following on Opus 4.7](#literal-instruction-following-on-opus-47)
+- [Task budgets (Opus 4.7 beta)](#task-budgets-opus-47-beta)
+- [Memory tool and filesystem-based memory](#memory-tool-and-filesystem-based-memory)
 - [Context awareness and multi-window workflows](#context-awareness-and-multi-window-workflows)
 - [Multi-context window workflows](#multi-context-window-workflows)
 - [State management best practices](#state-management-best-practices)
@@ -13,6 +16,7 @@ Guidance on building agentic systems with Claude, covering long-horizon reasonin
 - [Subagent orchestration](#subagent-orchestration)
 - [Chain complex prompts](#chain-complex-prompts)
 - [Reducing file creation](#reducing-file-creation)
+- [Overeagerness and overengineering](#overeagerness-and-overengineering)
 - [Preventing hard-coding and test-fixation](#preventing-hard-coding-and-test-fixation)
 - [Minimizing hallucinations](#minimizing-hallucinations)
 
@@ -20,7 +24,60 @@ Guidance on building agentic systems with Claude, covering long-horizon reasonin
 
 ## Long-horizon reasoning and state tracking
 
-Claude's latest models excel at long-horizon tasks with exceptional state tracking. Claude maintains orientation across extended sessions by focusing on incremental progress -- making steady advances on a few things at a time rather than attempting everything at once.
+Claude's latest models excel at long-horizon tasks with exceptional state tracking. Claude maintains orientation across extended sessions by focusing on incremental progress -- making steady advances on a few things at a time rather than attempting everything at once. Opus 4.7 is the strongest of the family on long-horizon agentic work, knowledge work, vision, and memory tasks.
+
+## Literal instruction following on Opus 4.7
+
+Opus 4.7 interprets prompts more literally than 4.6, especially at lower effort levels. It will not silently generalize an instruction from one item to another, and will not infer requests you didn't make.
+
+The upside is precision -- less thrash, more predictable behavior in pipelines and structured extraction. The cost is that vague or sloppy prompts that "worked" on 4.6 by relying on the model to fill in intent now produce conservative, incomplete output.
+
+Practical implications for agent prompts:
+
+- **Specify intent, constraints, acceptance criteria, and (for coding) file paths upfront.** Don't expect 4.7 to figure out what "fix the bug" means from context.
+- **First-turn detail compounds over a long trace.** A specific first turn → full implementation in one shot. A vague first turn → conservative work that requires several follow-ups.
+- **Audit pipelines that relied on 4.6's implicit intent-filling.** Anywhere your harness depended on phrases like "do whatever makes sense" is a likely tuning target.
+
+## Task budgets (Opus 4.7 beta)
+
+Opus 4.7 introduces task budgets: an advisory token allowance for the full agentic loop (thinking + tool calls + tool results + final output). The model sees a running countdown and uses it to prioritize and finish gracefully as the budget is consumed.
+
+Set the beta header `task-budgets-2026-03-13` and add to `output_config`:
+
+```python
+response = client.beta.messages.create(
+    model="claude-opus-4-7",
+    max_tokens=128000,
+    output_config={
+        "effort": "high",
+        "task_budget": {"type": "tokens", "total": 128000},
+    },
+    messages=[{"role": "user", "content": "Review the codebase and propose a refactor plan."}],
+    betas=["task-budgets-2026-03-13"],
+)
+```
+
+Notes:
+- Minimum task budget is 20k tokens.
+- A task budget is **advisory**, not a hard cap -- the model is aware of it and paces itself, but won't hard-stop.
+- `max_tokens` is the hard per-request ceiling. The model is not aware of `max_tokens`. Use `task_budget` for self-moderation, `max_tokens` to cap actual usage.
+- Don't set a task budget for open-ended quality-over-speed work. If the budget is too restrictive, the model may complete the task less thoroughly or refuse it entirely.
+- Reserve task budgets for workloads where you genuinely need the model to scope to a token allowance.
+
+## Memory tool and filesystem-based memory
+
+Opus 4.7 is meaningfully better at writing and using filesystem-based memory than 4.6. If your agent maintains a scratchpad, notes file, or structured memory store across turns, expect improvements at both note-taking and using prior notes.
+
+Two paths:
+- **Anthropic's client-side memory tool** -- managed scratchpad without building your own. Pairs naturally with context awareness.
+- **Roll your own** -- structured `tests.json` / `progress.txt` / git commits in the agent's working directory. Claude is good at discovering this state from the filesystem when starting a fresh context window.
+
+Example prompt for a fresh-window agent:
+```
+Call pwd; you can only read and write files in this directory. Review progress.txt,
+tests.json, and the git log. Manually run a fundamental integration test before
+implementing new features.
+```
 
 ## Context awareness and multi-window workflows
 
@@ -125,14 +182,14 @@ Break down this complex research task systematically.
 
 ## Subagent orchestration
 
-Claude 4.6 has significantly improved native subagent orchestration. It can recognize when tasks benefit from delegation and do so proactively.
+The picture changed between 4.6 and 4.7:
 
-To take advantage:
-1. Have well-defined subagent tools available
-2. Let Claude orchestrate naturally -- it will delegate without explicit instruction
-3. Watch for overuse -- Claude may spawn subagents when a simpler approach suffices
+- **Opus 4.6** has strong native subagent instincts and may *over*-spawn subagents -- including for tasks where a direct approach (e.g., a single grep) would be faster.
+- **Opus 4.7** is more judicious by default and spawns *fewer* subagents than 4.6.
 
-If seeing excessive subagent use:
+This means the prompting recommendation is now bidirectional depending on the model:
+
+**On 4.6 (curb overuse):**
 
 ```
 Use subagents when tasks can run in parallel, require isolated context, or involve
@@ -140,6 +197,19 @@ independent workstreams that don't need to share state. For simple tasks, sequen
 operations, single-file edits, or tasks where you need to maintain context across steps,
 work directly rather than delegating.
 ```
+
+**On 4.7 (encourage when appropriate):**
+
+If your workflow benefits from parallel subagents -- fanning out across files, processing independent items, parallel research threads -- spell that out:
+
+```
+When you have N independent items to process (files, URLs, search queries), fan them out
+across N subagents in parallel rather than processing sequentially. Subagents are
+appropriate for: independent file edits, parallel research, isolated computation, and
+tasks that don't need to share state.
+```
+
+In both cases the goal is calibration: get the model to delegate when delegation is faster, and not when it isn't.
 
 ## Chain complex prompts
 
@@ -155,6 +225,32 @@ Claude may create temporary files as a "scratchpad" during iteration. To minimiz
 If you create any temporary new files, scripts, or helper files for iteration, clean up
 these files by removing them at the end of the task.
 ```
+
+## Overeagerness and overengineering
+
+Claude Opus 4.5 and Opus 4.6 have a tendency to overengineer -- creating extra files, adding unnecessary abstractions, or building flexibility that wasn't requested. Add specific guidance to keep solutions minimal:
+
+```
+Avoid over-engineering. Only make changes that are directly requested or clearly necessary.
+Keep solutions simple and focused:
+
+- Scope: Don't add features, refactor code, or make "improvements" beyond what was asked.
+  A bug fix doesn't need surrounding code cleaned up. A simple feature doesn't need extra
+  configurability.
+
+- Documentation: Don't add docstrings, comments, or type annotations to code you didn't
+  change. Only add comments where the logic isn't self-evident.
+
+- Defensive coding: Don't add error handling, fallbacks, or validation for scenarios that
+  can't happen. Trust internal code and framework guarantees. Only validate at system
+  boundaries (user input, external APIs).
+
+- Abstractions: Don't create helpers, utilities, or abstractions for one-time operations.
+  Don't design for hypothetical future requirements. The right amount of complexity is the
+  minimum needed for the current task.
+```
+
+The four-area framing (Scope / Documentation / Defensive coding / Abstractions) tends to land better than a generic "don't over-engineer" instruction because each category names a specific behavior the model can recognize and suppress.
 
 ## Preventing hard-coding and test-fixation
 

@@ -5,6 +5,7 @@ Detailed guidance on controlling Claude's output style, format, and structure.
 ## Table of contents
 
 - [Communication style and verbosity](#communication-style-and-verbosity)
+- [Verbosity calibration on Opus 4.7](#verbosity-calibration-on-opus-47)
 - [Controlling response format](#controlling-response-format)
 - [LaTeX output](#latex-output)
 - [Document creation](#document-creation)
@@ -25,6 +26,22 @@ Claude may skip verbal summaries after tool calls, jumping directly to the next 
 ```
 After completing a task that involves tool use, provide a quick summary of the work you've done.
 ```
+
+## Verbosity calibration on Opus 4.7
+
+Opus 4.7 calibrates response length to perceived task complexity, rather than defaulting to a fixed verbosity. Expect shorter answers on simple lookups and longer ones on open-ended analysis.
+
+The tone has also shifted: more direct and opinionated, less validation-forward phrasing, fewer emoji than 4.6's warmer style.
+
+If your product depends on a particular length, voice, or style:
+
+- **Re-baseline before tuning.** Existing length-control prompts written for 4.6 may now produce surprising results. Remove them, observe the natural baseline, then add explicit guidance.
+- **Use positive examples, not negative instructions.** "Match the tone of the example below" outperforms "Don't be too brief / too verbose / too formal".
+- **To decrease verbosity:**
+  ```
+  Provide concise, focused responses. Skip non-essential context, and keep examples minimal.
+  ```
+- **To restore warmth or specific voice:** state it explicitly with a positive example. Telling the model "be friendlier" rarely works as well as showing it what friendly looks like.
 
 ## Controlling response format
 

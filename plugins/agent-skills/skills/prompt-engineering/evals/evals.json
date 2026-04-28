@@ -42,6 +42,22 @@
         "The response includes a concrete rewritten code snippet showing the migrated configuration",
         "The response mentions subagent behavior considerations for long-running autonomous tasks"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "I'm migrating my coding agent from claude-opus-4-6 to claude-opus-4-7. Right now I have:\n\n```python\nresponse = client.messages.create(\n    model='claude-opus-4-6',\n    max_tokens=32000,\n    temperature=0.2,\n    thinking={'type': 'enabled', 'budget_tokens': 16000},\n    system='You are an expert software engineer. After every 3 tool calls, summarize your progress. Double-check your work before returning.',\n    messages=messages,\n    tools=tools,\n)\n```\n\nWhat exactly do I need to change for 4.7? My agent does parallel work across many files and I want it to keep doing that. Also my UI shows the model's thinking to the user.",
+      "expected_output": "Migration guidance covering all 4.7 breaking changes (budget_tokens removal, sampling parameter removal, thinking content default, tokenizer change), behavior changes that affect this prompt (progress-update scaffolding can be removed, fewer subagents by default needs explicit guidance), and a rewritten code snippet.",
+      "files": [],
+      "expectations": [
+        "The response identifies that temperature=0.2 will cause a 400 error on 4.7 and must be removed",
+        "The response identifies that thinking with budget_tokens will cause a 400 error on 4.7 and replaces it with adaptive thinking",
+        "The response recommends an appropriate effort level (xhigh or high) for coding",
+        "The response notes that thinking content is omitted by default on 4.7 and recommends setting display: 'summarized' since the user surfaces thinking in their UI",
+        "The response notes the new tokenizer means max_tokens may need to be increased",
+        "The response mentions that the 'After every 3 tool calls, summarize progress' scaffolding can be removed because 4.7 emits progress updates natively",
+        "The response addresses that 4.7 spawns fewer subagents by default and provides explicit guidance to encourage parallel subagent use given the user's stated need",
+        "The response includes a concrete rewritten code snippet using model='claude-opus-4-7'"
+      ]
     }
   ]
 }
