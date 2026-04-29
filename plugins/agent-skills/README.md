@@ -6,6 +6,7 @@ My personal collection of skills I use with AI Agents. Packaged as a [Claude Cod
 
 | Skill | Description |
 |-------|-------------|
+| [design-tokens](skills/design-tokens/SKILL.md) | Create or update a `DESIGN.md` design-system document with YAML token front matter and markdown rationale |
 | [pin-github-actions](skills/pin-github-actions/SKILL.md) | Audit and pin GitHub Actions to commit SHAs with version comments for supply chain security |
 | [postgres-explorer](skills/postgres-explorer/SKILL.md) | Explore and query PostgreSQL databases in strict read-only mode via psql |
 | [prompt-engineering](skills/prompt-engineering/SKILL.md) | Prompt engineering guide for Claude's latest models (Opus 4.6, Sonnet 4.6, Haiku 4.5) |
