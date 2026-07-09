@@ -40,6 +40,7 @@ plugins/
 | Plugin | Source | Description |
 |--------|--------|-------------|
 | agent-skills | [plugins/agent-skills](./plugins/agent-skills) | Personal collection of skills for use with AI Agents |
+| xquik-x-data | [plugins/xquik-x-data](./plugins/xquik-x-data) | Xquik REST API and remote MCP workflows for X data, exports, monitoring, and webhooks |
 
 ## Configuration
 

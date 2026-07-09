@@ -8,6 +8,15 @@
       "name": "agent-skills",
       "source": "./plugins/agent-skills",
       "description": "My personal collection of skills I use with AI Agents"
+    },
+    {
+      "name": "xquik-x-data",
+      "source": "./plugins/xquik-x-data",
+      "description": "Guides Xquik REST API and remote MCP workflows for X data, exports, monitoring, and webhooks"
     }
-  ]
+  ],
+  "metadata": {
+    "description": "Personal Claude Code plugin marketplace with agent skills and Xquik X data workflows",
+    "version": "1.0.1"
+  }
 }
